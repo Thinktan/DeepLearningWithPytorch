@@ -48,3 +48,66 @@ gray_plain = gray_named.rename(None)
 print('gray_plain: ', gray_plain.shape, gray_plain.names)
 
 print('-------------未命名方法--------------')
+
+
+# In[2]:
+img_t = torch.randn(3, 5, 5) # shape [channels, rows, columns]
+weights = torch.tensor([0.2126, 0.7152, 0.0722])
+print('img_t: ', img_t.shape)
+print('weights: ', weights.shape)
+
+# In[3]:
+batch_t = torch.randn(2, 3, 5, 5) # shape [batch, channels, rows, columns]
+print('batch_t: ', batch_t.shape)
+
+
+# In[4]
+img_gray_naive = img_t.mean(-3)
+batch_gray_naive = batch_t.mean(-3)
+print('img_gray_naive: ', img_gray_naive.shape)
+print('batch_gray_naive: ', batch_gray_naive.shape)
+
+# In[5]
+unsqueezed_weights = weights.unsqueeze(-1).unsqueeze(-1)
+print('unsqueezed_weight: ', unsqueezed_weights.shape)
+img_weights = (img_t*unsqueezed_weights)
+print('img_weights: ', img_weights.shape)
+batch_weights = (batch_t*unsqueezed_weights)
+print('batch_weights: ', batch_weights.shape)
+
+img_gray_weighted = img_weights.sum(-3)
+batch_gray_weighted = batch_weights.sum(-3)
+print('img_gray_weighted: ', img_gray_weighted.shape)
+print('batch_gray_weighted: ', batch_gray_weighted.shape)
+
+# test
+a = torch.ones(3)
+a[0] = 1
+a[1] = 2
+a[2] = 3
+b = a.unsqueeze(1)
+c = b.unsqueeze(0)
+print(a)
+print(a.shape)
+print(b)
+print(b.shape)
+print(c)
+print(c.shape)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
