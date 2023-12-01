@@ -24,3 +24,6 @@ print(t_p)
 
 loss = loss_fn(t_p, t_c)
 print(loss)
+
+
+
