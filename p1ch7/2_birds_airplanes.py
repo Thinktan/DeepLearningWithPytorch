@@ -1,6 +1,8 @@
 from matplotlib import pyplot as plt
 import numpy as np
 import torch
+import torch.nn as nn
+import torch.optim as optim
 
 torch.set_printoptions(edgeitems=2)
 torch.manual_seed(123)
@@ -58,68 +60,87 @@ img, _ = cifar2[0]
 # plt.imshow(img.permute(1, 2, 0))
 # plt.show()
 
-img_batch = img.view(-1).unsqueeze(0)
-out = model(img_batch)
-
-_, index = torch.max(out, dim=1)
-print(index)
-
-loss = nn.NLLLoss()
+#############################################
+# img_batch = img.view(-1).unsqueeze(0)
+# out = model(img_batch)
+#
+# _, index = torch.max(out, dim=1)
+# print(index)
+#
+# loss = nn.NLLLoss()
 
 # 训练
-import torch
-import torch.nn as nn
-import torch.optim as optim
+#
+# train_loader = torch.utils.data.DataLoader(cifar2, batch_size=64,
+#                                            shuffle=True)
+#
+# learning_rate = 1e-2
+#
+# optimizer = optim.SGD(model.parameters(), lr=learning_rate)
+#
+# loss_fn = nn.NLLLoss()
+#
+# n_epochs = 100
+#
+# for epoch in range(n_epochs):
+#     for imgs, labels in train_loader:
+#         batch_size = imgs.shape[0]
+#         outputs = model(imgs.view(batch_size, -1))
+#         loss = loss_fn(outputs, labels)
+#
+#         optimizer.zero_grad()
+#         loss.backward()
+#         optimizer.step()
+#
+# print("Epoch: %d, Loss: %f" % (epoch, float(loss)))
+#
+# # 评估
+# val_loader = torch.utils.data.DataLoader(cifar2_val, batch_size=64,
+#                                          shuffle=False)
+# correct = 0
+# total = 0
+#
+# with torch.no_grad():
+#    for imgs, labels in val_loader:
+#        batch_size = imgs.shape[0]
+#        outputs = model(imgs.view(batch_size, -1))
+#        _, predicted = torch.max(outputs, dim=1)
+#        total += labels.shape[0]
+#        correct += int((predicted == labels).sum())
+#
+# print("Accuracy: %f", correct / total)
 
-train_loader = torch.utils.data.DataLoader(cifar2, batch_size=64,
-                                           shuffle=True)
 
-learning_rate = 1e-2
 
-optimizer = optim.SGD(model.parameters(), lr=learning_rate)
+#############################################
+# 8.2 卷积实战
+conv = nn.Conv2d(3, 1, kernel_size=3, padding=1)
+output = conv(img.unsqueeze(0))
+print('img: ', img.unsqueeze(0).shape, output.shape)
 
-loss_fn = nn.NLLLoss()
+# 8.2.1 用卷积检测特征
 
-n_epochs = 100
+## 1 更平滑的特征图
+# with torch.no_grad():
+#     conv.bias.zero_()
+#
+# with torch.no_grad():
+#     conv.weight.fill_(1.0/9.0)
+#
+# output = conv(img.unsqueeze(0))
+# plt.imshow(output[0, 0].detach(), cmap='gray')
+# plt.show()
 
-for epoch in range(n_epochs):
-    for imgs, labels in train_loader:
-        batch_size = imgs.shape[0]
-        outputs = model(imgs.view(batch_size, -1))
-        loss = loss_fn(outputs, labels)
-
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-print("Epoch: %d, Loss: %f" % (epoch, float(loss)))
-
-# 评估
-val_loader = torch.utils.data.DataLoader(cifar2_val, batch_size=64,
-                                         shuffle=False)
-correct = 0
-total = 0
-
+## 2 垂直检测器
 with torch.no_grad():
-   for imgs, labels in val_loader:
-       batch_size = imgs.shape[0]
-       outputs = model(imgs.view(batch_size, -1))
-       _, predicted = torch.max(outputs, dim=1)
-       total += labels.shape[0]
-       correct += int((predicted == labels).sum())
+    conv.weight[:] = torch.tensor([[-1.0, 0.0, 1.0],
+                                   [-1.0, 0.0, 1.0],
+                                   [-1.0, 0.0, 1.0]])
+    conv.bias.zero_()
 
-print("Accuracy: %f", correct / total)
-
-
-
-
-
-
-
-
-
-
-
+output = conv(img.unsqueeze(0))
+plt.imshow(output[0, 0].detach(), cmap='gray')
+plt.show()
 
 
 
