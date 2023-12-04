@@ -156,10 +156,10 @@ print('output: ', output.shape)
 model = nn.Sequential(
     nn.Conv2d(3, 16, kernel_size=3, padding=1),
     nn.Tanh(),
-    nn.MaxPool2d(),
+    nn.MaxPool2d(2),
     nn.Conv2d(16, 8, kernel_size=3, padding=1),
     nn.Tanh(),
-    nn.MaxPool2d(),
+    nn.MaxPool2d(2),
     # missing something important 缺少从有8个通道的、8×8的图像转换为有512个元素的一维向量的步骤
     nn.Linear(8*8*8, 32),
     nn.Tanh(),
