@@ -116,7 +116,8 @@ img, _ = cifar2[0]
 # 8.2 卷积实战
 conv = nn.Conv2d(3, 1, kernel_size=3, padding=1)
 output = conv(img.unsqueeze(0))
-print('img: ', img.unsqueeze(0).shape, output.shape)
+print('img: ', img.unsqueeze(0).shape)
+print('output: ', output.shape)
 
 # 8.2.1 用卷积检测特征
 
@@ -132,20 +133,41 @@ print('img: ', img.unsqueeze(0).shape, output.shape)
 # plt.show()
 
 ## 2 垂直检测器
-with torch.no_grad():
-    conv.weight[:] = torch.tensor([[-1.0, 0.0, 1.0],
-                                   [-1.0, 0.0, 1.0],
-                                   [-1.0, 0.0, 1.0]])
-    conv.bias.zero_()
-
-output = conv(img.unsqueeze(0))
-plt.imshow(output[0, 0].detach(), cmap='gray')
-plt.show()
-
-
+# with torch.no_grad():
+#     conv.weight[:] = torch.tensor([[-1.0, 0.0, 1.0],
+#                                    [-1.0, 0.0, 1.0],
+#                                    [-1.0, 0.0, 1.0]])
+#     conv.bias.zero_()
+#
+# output = conv(img.unsqueeze(0))
+# plt.imshow(output[0, 0].detach(), cmap='gray')
+# plt.show()
 
 
+# 8.2.3 池化技术
 
+# 1. 下采样
+pool = nn.MaxPool2d(2)
+output = pool(img.unsqueeze(0))
+print('img: ', img.unsqueeze(0).shape)
+print('output: ', output.shape)
+
+# 8.2.4 整合网络
+model = nn.Sequential(
+    nn.Conv2d(3, 16, kernel_size=3, padding=1),
+    nn.Tanh(),
+    nn.MaxPool2d(),
+    nn.Conv2d(16, 8, kernel_size=3, padding=1),
+    nn.Tanh(),
+    nn.MaxPool2d(),
+    # missing something important 缺少从有8个通道的、8×8的图像转换为有512个元素的一维向量的步骤
+    nn.Linear(8*8*8, 32),
+    nn.Tanh(),
+    nn.Linear(32, 2)
+)
+
+numel_list = [p.numel() for p in model.parameters()]
+print(sum(numel_list), numel_list)
 
 
 
