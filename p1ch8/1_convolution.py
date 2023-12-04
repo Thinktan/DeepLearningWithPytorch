@@ -63,16 +63,3 @@ class Net(nn.Module):
 
 model = Net()
 print(model(img.unsqueeze(0)))
-
-
-
-
-
-
-
-
-
-
-
-
-
