@@ -12,7 +12,6 @@ import time
 torch.set_printoptions(edgeitems=2)
 torch.manual_seed(123)
 
-
 # 准备数据
 class_names = ['airplane','automobile','bird','cat','deer',
                'dog','frog','horse','ship','truck']
@@ -63,59 +62,21 @@ class Net(nn.Module):
         out = self.fc2(out)
         return out
 
-# model = Net()
-# print(model(img.unsqueeze(0)))
-
 # 判断设备
 device = (torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu'))
-# device = torch.device('cpu')
 print(f"Training on device {device}.")
 
+loaded_model = Net()
+print(loaded_model(img.unsqueeze(0)))
 
-def training_loop(n_epochs, optimizer, model, loss_fn, train_loader):
-    for epoch in range(1, n_epochs + 1):
-        loss_train = 0.0
-        for imgs, labels in train_loader:
-            # img,labels 移动到GPU
-            imgs = imgs.to(device=device)
-            labels = labels.to(device=device)
+# 加载模型
+loaded_model.load_state_dict(torch.load(data_path + "birds_vs_airplanes.pt", map_location=device))
+print(loaded_model)
 
-            outputs = model(imgs)
-            loss = loss_fn(outputs, labels)
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-            loss_train += loss.item()
+loaded_model.to(device=device)
 
-        if epoch == 1 or epoch % 10 == 0:
-            print('{} Epoch {}, Training loss {}'.format(
-                datetime.datetime.now(), epoch,
-                loss_train / len(train_loader)))
 
-# 训练
-train_loader = torch.utils.data.DataLoader(cifar2, batch_size=64, shuffle=True)
-
-model = Net().to(device=device)
-# model = Net()
-optimizer = optim.SGD(model.parameters(), lr=1e-2)
-loss_fn = nn.CrossEntropyLoss()
-
-start_time = time.time()
-
-training_loop(
-    n_epochs = 100,
-    optimizer = optimizer,
-    model = model,
-    loss_fn = loss_fn,
-    train_loader = train_loader,
-)
-
-end_time = time.time()
-execution_time = end_time - start_time
-print(f"Execution time: {execution_time} seconds")
-
-# 测量
-# In[32]:
+# 进行测试
 train_loader = torch.utils.data.DataLoader(cifar2, batch_size=64,
                                            shuffle=False)
 val_loader = torch.utils.data.DataLoader(cifar2_val, batch_size=64,
@@ -132,14 +93,13 @@ def validate(model, train_loader, val_loader):
                 labels = labels.to(device=device)
                 outputs = model(imgs)
                 _, predicted = torch.max(outputs, dim=1)
-                # print("predicted: ", predicted.shape)
-                # print("labels: ", labels.shape)
                 total += labels.shape[0]
                 correct += int((predicted == labels).sum())
 
         print("Accuracy {}: {:.2f}".format(name , correct / total))
 
-validate(model, train_loader, val_loader)
-
-# 保存模型
-torch.save(model.state_dict(), data_path + 'birds_vs_airplanes.pt')
+start_time = time.time()
+validate(loaded_model, train_loader, val_loader)
+end_time = time.time()
+execution_time = end_time - start_time
+print(f"Execution time: {execution_time} seconds")
