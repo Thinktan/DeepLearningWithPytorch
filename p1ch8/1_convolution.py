@@ -6,6 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+import datetime
 
 torch.set_printoptions(edgeitems=2)
 torch.manual_seed(123)
@@ -16,7 +17,7 @@ class_names = ['airplane','automobile','bird','cat','deer',
                'dog','frog','horse','ship','truck']
 
 from torchvision import datasets, transforms
-data_path = '../data-unversioned/p1ch6/'
+data_path = '../data-unversioned/p1ch7/'
 cifar10 = datasets.CIFAR10(
     data_path, train=True, download=True,
     transform=transforms.Compose([
@@ -63,3 +64,63 @@ class Net(nn.Module):
 
 model = Net()
 print(model(img.unsqueeze(0)))
+
+
+
+
+def training_loop(n_epochs, optimizer, model, loss_fn, train_loader):
+    for epoch in range(1, n_epochs + 1):
+        loss_train = 0.0
+        for imgs, labels in train_loader:
+            outputs = model(imgs)
+            loss = loss_fn(outputs, labels)
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            loss_train += loss.item()
+
+        if epoch == 1 or epoch % 10 == 0:
+            print('{} Epoch {}, Training loss {}'.format(
+                datetime.datetime.now(), epoch,
+                loss_train / len(train_loader)))
+
+# 训练
+train_loader = torch.utils.data.DataLoader(cifar2, batch_size=64, shuffle=True)
+
+model = Net()
+optimizer = optim.SGD(model.parameters(), lr=1e-2)
+loss_fn = nn.CrossEntropyLoss()
+
+training_loop(
+    n_epochs = 100,
+    optimizer = optimizer,
+    model = model,
+    loss_fn = loss_fn,
+    train_loader = train_loader,
+)
+
+# 测量
+# In[32]:
+train_loader = torch.utils.data.DataLoader(cifar2, batch_size=64,
+                                           shuffle=False)
+val_loader = torch.utils.data.DataLoader(cifar2_val, batch_size=64,
+                                         shuffle=False)
+
+def validate(model, train_loader, val_loader):
+    for name, loader in [("train", train_loader), ("val", val_loader)]:
+        correct = 0
+        total = 0
+
+        with torch.no_grad():
+            for imgs, labels in loader:
+                outputs = model(imgs)
+                _, predicted = torch.max(outputs, dim=1)
+                total += labels.shape[0]
+                correct += int((predicted == labels).sum())
+
+        print("Accuracy {}: {:.2f}".format(name , correct / total))
+
+print("validate: \n", validate(model, train_loader, val_loader))
+
+# 保存模型
+torch.save(model.state_dict(), data_path + 'birds_vs_airplanes.pt')
