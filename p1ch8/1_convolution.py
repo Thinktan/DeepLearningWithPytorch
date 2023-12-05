@@ -74,6 +74,8 @@ elif torch.cuda.is_available():
 else:
     device = torch.device('cpu')
 
+# device = torch.device('cpu')
+
 print(f"Training on device {device}.")
 
 
