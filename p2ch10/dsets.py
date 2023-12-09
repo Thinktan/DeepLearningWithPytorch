@@ -11,7 +11,6 @@ CandidateInfoTuple = namedtuple(
   'isNodule_bool, diameter_mm, series_uid, center_xyz',
 )
 
-# TODO 探索这个功能作用
 @functools.lru_cache(1)
 def getCandidateInfoList(requireOnDisk_book = True):
     mhd_list = glob.glob('../data-unversioned/part2/luna/subset*/*mhd')
