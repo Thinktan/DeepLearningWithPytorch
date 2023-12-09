@@ -15,3 +15,4 @@ log.setLevel(logging.DEBUG)
 
 IrcTuple = collections.namedtuple('IrcTuple', ['index', 'row', 'col'])
 XyzTuple = collections.namedtuple('XyzTuple', ['x', 'y', 'z'])
+
